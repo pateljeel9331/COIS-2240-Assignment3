@@ -4,7 +4,7 @@ import java.time.LocalDate;
 public class VehicleRentalApp {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-       RentalSystem rentalSystem = RentalSystem.getInstance();
+        RentalSystem rentalSystem = RentalSystem.getInstance();
 
         while (true) {
         	System.out.println("\n1: Add Vehicle\n" + 
@@ -40,12 +40,10 @@ public class VehicleRentalApp {
                         System.out.print("Enter number of seats: ");
                         int seats = scanner.nextInt();
                         vehicle = new Car(make, model, year, seats);
-                        System.out.println("Car added successfully.");
                     } else if (type == 2) {
                         System.out.print("Is accessible? (true/false): ");
                         boolean isAccessible = scanner.nextBoolean();
                         vehicle = new Minibus(make, model, year, isAccessible);
-                        System.out.println("Minibus added successfully.");
 		            } else if (type == 3) {
 		                System.out.print("Enter the cargo size: ");
 		                double cargoSize = scanner.nextDouble();
@@ -53,14 +51,15 @@ public class VehicleRentalApp {
 		                System.out.print("Has trailer? (true/false): ");
 		                boolean hasTrailer = scanner.nextBoolean();
 		                vehicle = new PickupTruck(make, model, year, cargoSize, hasTrailer);
-		                System.out.println("Pickup Truck added successfully.");
 		            } else {
 		            	vehicle = null;
 		            }
                     
                     if (vehicle != null){
 	                    vehicle.setLicensePlate(plate);
-	                    rentalSystem.addVehicle(vehicle);
+	                    if (rentalSystem.addVehicle(vehicle)) {
+	                        System.out.println("Vehicle added successfully.");
+	                    }
                     }
                     else {
 	                    System.out.println("Vehicle not added successfully.");
@@ -74,8 +73,9 @@ public class VehicleRentalApp {
                     System.out.print("Enter name: ");
                     String cname = scanner.nextLine();
 
-                    rentalSystem.addCustomer(new Customer(cid, cname));
-                    System.out.println("Customer added successfully.");
+                    if (rentalSystem.addCustomer(new Customer(cid, cname))) {
+                        System.out.println("Customer added successfully.");
+                    }
                     break;
                     
                 case 3:

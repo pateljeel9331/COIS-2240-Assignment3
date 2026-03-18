@@ -24,14 +24,24 @@ public class RentalSystem {
         return instance;
     }
 
-    public void addVehicle(Vehicle vehicle) {
+    public boolean addVehicle(Vehicle vehicle) {
+        if (findVehicleByPlate(vehicle.getLicensePlate()) != null) {
+            System.out.println("Error: A vehicle with plate " + vehicle.getLicensePlate() + " already exists.");
+            return false;
+        }
         vehicles.add(vehicle);
         saveVehicle(vehicle);
+        return true;
     }
 
-    public void addCustomer(Customer customer) {
+    public boolean addCustomer(Customer customer) {
+        if (findCustomerById(customer.getCustomerId()) != null) {
+            System.out.println("Error: A customer with ID " + customer.getCustomerId() + " already exists.");
+            return false;
+        }
         customers.add(customer);
         saveCustomer(customer);
+        return true;
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
@@ -71,7 +81,7 @@ public class RentalSystem {
         // Header with proper column widths
         System.out.printf("|%-16s | %-12s | %-12s | %-12s | %-6s | %-18s |%n", 
             " Type", "Plate", "Make", "Model", "Year", "Status");
-       
+        System.out.println("|--------------------------------------------------------------------------------------------|");
     	  
         boolean found = false;
         for (Vehicle vehicle : vehicles) {
@@ -114,7 +124,8 @@ public class RentalSystem {
             // Header with proper column widths
             System.out.printf("|%-10s | %-12s | %-20s | %-12s | %-12s |%n", 
                 " Type", "Plate", "Customer", "Date", "Amount");
-        
+            System.out.println("|-------------------------------------------------------------------------------|");
+            
             for (RentalRecord record : rentalHistory.getRentalHistory()) {                
                 System.out.printf("| %-9s | %-12s | %-20s | %-12s | $%-11.2f |%n", 
                     record.getRecordType(), 
@@ -199,7 +210,7 @@ public class RentalSystem {
     }
 
     private void loadData() {
-        
+        // --- Load vehicles.txt ---
         // Format: Type,Plate,Make,Model,Year,Status,<extra fields>
         try (BufferedReader br = new BufferedReader(new FileReader("vehicles.txt"))) {
             String line;
@@ -244,7 +255,7 @@ public class RentalSystem {
             System.out.println("No existing vehicles data found.");
         }
 
-    
+        // --- Load customers.txt ---
         // Format: CustomerId,CustomerName
         try (BufferedReader br = new BufferedReader(new FileReader("customers.txt"))) {
             String line;
@@ -258,7 +269,7 @@ public class RentalSystem {
             System.out.println("No existing customers data found.");
         }
 
-    
+        // --- Load rental_records.txt ---
         // Format: RecordType,Plate,CustomerId,CustomerName,Date,Amount
         try (BufferedReader br = new BufferedReader(new FileReader("rental_records.txt"))) {
             String line;

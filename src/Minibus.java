@@ -6,9 +6,8 @@ public class Minibus extends Vehicle implements Rentable {
         this.isAccessible = isAccessible;
     }
 
-    @Override
-    public String getInfo() {
-        return super.getInfo() + " | Accessible: " + (isAccessible ? "Yes" : "No");
+    public boolean isAccessible() {
+        return isAccessible;
     }
 
     @Override

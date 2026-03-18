@@ -1,0 +1,3 @@
+Car,AAA111,Toyota,Corolla,2019,Available,5
+Minibus,BBB222,Honda,Civic,2021,Available,true
+PickupTruck,CCC333,Ford,Focus,2024,Available,12.0,true

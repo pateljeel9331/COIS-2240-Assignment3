@@ -255,8 +255,7 @@ public class RentalSystem {
             System.out.println("No existing vehicles data found.");
         }
 
-        // --- Load customers.txt ---
-        // Format: CustomerId,CustomerName
+       
         try (BufferedReader br = new BufferedReader(new FileReader("customers.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -269,8 +268,7 @@ public class RentalSystem {
             System.out.println("No existing customers data found.");
         }
 
-        // --- Load rental_records.txt ---
-        // Format: RecordType,Plate,CustomerId,CustomerName,Date,Amount
+    
         try (BufferedReader br = new BufferedReader(new FileReader("rental_records.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {

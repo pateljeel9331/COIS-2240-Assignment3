@@ -71,14 +71,12 @@ public class RentalSystem {
     }    
 
     public void displayVehicles(Vehicle.VehicleStatus status) {
-        // Display appropriate title based on status
         if (status == null) {
             System.out.println("\n=== All Vehicles ===");
         } else {
             System.out.println("\n=== " + status + " Vehicles ===");
         }
         
-        // Header with proper column widths
         System.out.printf("|%-16s | %-12s | %-12s | %-12s | %-6s | %-18s |%n", 
             " Type", "Plate", "Make", "Model", "Year", "Status");
         System.out.println("|--------------------------------------------------------------------------------------------|");
@@ -121,7 +119,6 @@ public class RentalSystem {
         if (rentalHistory.getRentalHistory().isEmpty()) {
             System.out.println("  No rental history found.");
         } else {
-            // Header with proper column widths
             System.out.printf("|%-10s | %-12s | %-20s | %-12s | %-12s |%n", 
                 " Type", "Plate", "Customer", "Date", "Amount");
             System.out.println("|-------------------------------------------------------------------------------|");
@@ -210,8 +207,6 @@ public class RentalSystem {
     }
 
     private void loadData() {
-        // --- Load vehicles.txt ---
-        // Format: Type,Plate,Make,Model,Year,Status,<extra fields>
         try (BufferedReader br = new BufferedReader(new FileReader("vehicles.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -255,7 +250,6 @@ public class RentalSystem {
             System.out.println("No existing vehicles data found.");
         }
 
-       
         try (BufferedReader br = new BufferedReader(new FileReader("customers.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -268,7 +262,6 @@ public class RentalSystem {
             System.out.println("No existing customers data found.");
         }
 
-    
         try (BufferedReader br = new BufferedReader(new FileReader("rental_records.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -283,7 +276,6 @@ public class RentalSystem {
                 Vehicle  vehicle  = findVehicleByPlate(plate);
                 Customer customer = findCustomerById(customerId);
 
-                // Fall back to a stub if not found in loaded lists
                 if (customer == null) customer = new Customer(customerId, custName);
                 if (vehicle  != null) {
                     rentalHistory.addRecord(
@@ -295,4 +287,16 @@ public class RentalSystem {
         }
     }
 
+    // GETTERS FOR GUI
+    public List<Vehicle> getAllVehicles() {
+        return new ArrayList<>(vehicles);
+    }
+
+    public List<Customer> getAllCustomers() {
+        return new ArrayList<>(customers);
+    }
+
+    public List<RentalRecord> getRentalHistory() {
+        return rentalHistory.getRentalHistory();
+    }
 }

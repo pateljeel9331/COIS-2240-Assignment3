@@ -24,19 +24,28 @@ public abstract class Vehicle {
         this(null, null, 0);
     }
 
+    private boolean isValidPlate(String plate) {
+        if (plate == null) return false;
+        return plate.matches("[A-Z]{3}[0-9]{3}");
+    }
+
     public void setLicensePlate(String plate) {
-        this.licensePlate = plate == null ? null : plate.toUpperCase();
+        String formattedPlate = plate == null ? null : plate.toUpperCase();
+        if (!isValidPlate(formattedPlate)) {
+            throw new IllegalArgumentException("Invalid license plate");
+        }
+        this.licensePlate = formattedPlate;
     }
 
     public void setStatus(VehicleStatus status) {
-    	this.status = status;
+        this.status = status;
     }
 
     public String getLicensePlate() { return licensePlate; }
 
     public String getMake() { return make; }
 
-    public String getModel() { return model;}
+    public String getModel() { return model; }
 
     public int getYear() { return year; }
 
@@ -45,5 +54,4 @@ public abstract class Vehicle {
     public String getInfo() {
         return "| " + licensePlate + " | " + make + " | " + model + " | " + year + " | " + status + " |";
     }
-
 }

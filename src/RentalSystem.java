@@ -44,31 +44,35 @@ public class RentalSystem {
         return true;
     }
 
-    public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
+    public boolean rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Available) {
             vehicle.setStatus(Vehicle.VehicleStatus.Rented);
             RentalRecord record = new RentalRecord(vehicle, customer, date, amount, "RENT");
             rentalHistory.addRecord(record);
             System.out.println("Vehicle rented to " + customer.getCustomerName());
             saveRecord(record);
-        }
-        else {
+            saveAllVehicles();
+            return true;
+        } else {
             System.out.println("Vehicle is not available for renting.");
+            return false;
         }
     }
 
-    public void returnVehicle(Vehicle vehicle, Customer customer, LocalDate date, double extraFees) {
+    public boolean returnVehicle(Vehicle vehicle, Customer customer, LocalDate date, double extraFees) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Rented) {
             vehicle.setStatus(Vehicle.VehicleStatus.Available);
             RentalRecord record = new RentalRecord(vehicle, customer, date, extraFees, "RETURN");
             rentalHistory.addRecord(record);
             System.out.println("Vehicle returned by " + customer.getCustomerName());
             saveRecord(record);
-        }
-        else {
+            saveAllVehicles();
+            return true;
+        } else {
             System.out.println("Vehicle is not rented.");
+            return false;
         }
-    }    
+    }
 
     public void displayVehicles(Vehicle.VehicleStatus status) {
         if (status == null) {
@@ -76,17 +80,19 @@ public class RentalSystem {
         } else {
             System.out.println("\n=== " + status + " Vehicles ===");
         }
-        
-        System.out.printf("|%-16s | %-12s | %-12s | %-12s | %-6s | %-18s |%n", 
+
+        System.out.printf("|%-16s | %-12s | %-12s | %-12s | %-6s | %-18s |%n",
             " Type", "Plate", "Make", "Model", "Year", "Status");
         System.out.println("|--------------------------------------------------------------------------------------------|");
-    	  
+
         boolean found = false;
         for (Vehicle vehicle : vehicles) {
             if (status == null || vehicle.getStatus() == status) {
                 found = true;
                 String vehicleType;
-                if (vehicle instanceof Car) {
+                if (vehicle instanceof SportCar) {
+                    vehicleType = "Sport Car";
+                } else if (vehicle instanceof Car) {
                     vehicleType = "Car";
                 } else if (vehicle instanceof Minibus) {
                     vehicleType = "Minibus";
@@ -95,8 +101,9 @@ public class RentalSystem {
                 } else {
                     vehicleType = "Unknown";
                 }
-                System.out.printf("| %-15s | %-12s | %-12s | %-12s | %-6d | %-18s |%n", 
-                    vehicleType, vehicle.getLicensePlate(), vehicle.getMake(), vehicle.getModel(), vehicle.getYear(), vehicle.getStatus().toString());
+                System.out.printf("| %-15s | %-12s | %-12s | %-12s | %-6d | %-18s |%n",
+                    vehicleType, vehicle.getLicensePlate(), vehicle.getMake(),
+                    vehicle.getModel(), vehicle.getYear(), vehicle.getStatus().toString());
             }
         }
         if (!found) {
@@ -114,31 +121,30 @@ public class RentalSystem {
             System.out.println("  " + c.toString());
         }
     }
-    
+
     public void displayRentalHistory() {
         if (rentalHistory.getRentalHistory().isEmpty()) {
             System.out.println("  No rental history found.");
         } else {
-            System.out.printf("|%-10s | %-12s | %-20s | %-12s | %-12s |%n", 
+            System.out.printf("|%-10s | %-12s | %-20s | %-12s | %-12s |%n",
                 " Type", "Plate", "Customer", "Date", "Amount");
             System.out.println("|-------------------------------------------------------------------------------|");
-            
-            for (RentalRecord record : rentalHistory.getRentalHistory()) {                
-                System.out.printf("| %-9s | %-12s | %-20s | %-12s | $%-11.2f |%n", 
-                    record.getRecordType(), 
+
+            for (RentalRecord record : rentalHistory.getRentalHistory()) {
+                System.out.printf("| %-9s | %-12s | %-20s | %-12s | $%-11.2f |%n",
+                    record.getRecordType(),
                     record.getVehicle().getLicensePlate(),
                     record.getCustomer().getCustomerName(),
                     record.getRecordDate().toString(),
-                    record.getTotalAmount()
-                );
+                    record.getTotalAmount());
             }
             System.out.println();
         }
     }
-    
+
     public Vehicle findVehicleByPlate(String plate) {
         for (Vehicle v : vehicles) {
-            if (v.getLicensePlate().equalsIgnoreCase(plate)) {
+            if (v.getLicensePlate() != null && v.getLicensePlate().equalsIgnoreCase(plate)) {
                 return v;
             }
         }
@@ -154,34 +160,49 @@ public class RentalSystem {
 
     private void saveVehicle(Vehicle vehicle) {
         try (FileWriter writer = new FileWriter("vehicles.txt", true)) {
-            String type;
-            String extra;
-            if (vehicle instanceof SportCar sc) {
-                type  = "SportCar";
-                extra = sc.getNumSeats() + "," + sc.getHorsepower() + "," + sc.hasTurbo();
-            } else if (vehicle instanceof Car c) {
-                type  = "Car";
-                extra = String.valueOf(c.getNumSeats());
-            } else if (vehicle instanceof Minibus mb) {
-                type  = "Minibus";
-                extra = String.valueOf(mb.isAccessible());
-            } else if (vehicle instanceof PickupTruck pt) {
-                type  = "PickupTruck";
-                extra = pt.getCargoSize() + "," + pt.hasTrailer();
-            } else {
-                type  = "Unknown";
-                extra = "";
-            }
-            writer.write(type + "," +
-                         vehicle.getLicensePlate() + "," +
-                         vehicle.getMake() + "," +
-                         vehicle.getModel() + "," +
-                         vehicle.getYear() + "," +
-                         vehicle.getStatus() + "," +
-                         extra + "\n");
+            writer.write(buildVehicleLine(vehicle));
         } catch (IOException e) {
             System.out.println("Error saving vehicle: " + e.getMessage());
         }
+    }
+
+    // Overwrites vehicles.txt with current state of all vehicles (called after rent/return)
+    private void saveAllVehicles() {
+        try (FileWriter writer = new FileWriter("vehicles.txt", false)) {
+            for (Vehicle v : vehicles) {
+                writer.write(buildVehicleLine(v));
+            }
+        } catch (IOException e) {
+            System.out.println("Error updating vehicles file: " + e.getMessage());
+        }
+    }
+
+    private String buildVehicleLine(Vehicle vehicle) {
+        String type;
+        String extra;
+        if (vehicle instanceof SportCar sc) {
+            type  = "SportCar";
+            extra = sc.getNumSeats() + "," + sc.getHorsepower() + "," + sc.hasTurbo();
+        } else if (vehicle instanceof Car c) {
+            type  = "Car";
+            extra = String.valueOf(c.getNumSeats());
+        } else if (vehicle instanceof Minibus mb) {
+            type  = "Minibus";
+            extra = String.valueOf(mb.isAccessible());
+        } else if (vehicle instanceof PickupTruck pt) {
+            type  = "PickupTruck";
+            extra = pt.getCargoSize() + "," + pt.hasTrailer();
+        } else {
+            type  = "Unknown";
+            extra = "";
+        }
+        return type + "," +
+               vehicle.getLicensePlate() + "," +
+               vehicle.getMake() + "," +
+               vehicle.getModel() + "," +
+               vehicle.getYear() + "," +
+               vehicle.getStatus() + "," +
+               extra + "\n";
     }
 
     private void saveCustomer(Customer customer) {
@@ -287,7 +308,7 @@ public class RentalSystem {
         }
     }
 
-    // GETTERS FOR GUI
+    
     public List<Vehicle> getAllVehicles() {
         return new ArrayList<>(vehicles);
     }

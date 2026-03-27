@@ -1,9 +1,7 @@
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.time.LocalDate;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,9 +14,6 @@ class VehicleRentalTest {
         system = RentalSystem.getInstance();
     }
 
-    // -------------------------------------------------------------------------
-    // Task: License Plate Validation
-    // -------------------------------------------------------------------------
     @Test
     void testLicensePlate() {
         // --- Valid plates: should NOT throw ---
@@ -34,13 +29,13 @@ class VehicleRentalTest {
         assertDoesNotThrow(() -> car3.setLicensePlate("ZZZ999"));
         assertEquals("ZZZ999", car3.getLicensePlate());
 
-        // --- Invalid plates: should throw IllegalArgumentException ---
+       
 
         // Empty string
         Car invalidCar1 = new Car("Mazda", "3", 2023, 5);
         assertThrows(IllegalArgumentException.class, () -> invalidCar1.setLicensePlate(""));
 
-        // Null
+    
         Car invalidCar2 = new Car("Nissan", "Altima", 2023, 5);
         assertThrows(IllegalArgumentException.class, () -> invalidCar2.setLicensePlate(null));
 
@@ -53,9 +48,6 @@ class VehicleRentalTest {
         assertThrows(IllegalArgumentException.class, () -> invalidCar4.setLicensePlate("ZZZ99"));
     }
 
-    // -------------------------------------------------------------------------
-    // Task: Rent and Return Vehicle Validation
-    // -------------------------------------------------------------------------
     @Test
     void testRentAndReturnVehicle() {
         // Use a unique plate to avoid collisions with persisted data
@@ -102,9 +94,7 @@ class VehicleRentalTest {
         assertFalse(returnAgain, "Returning an already-available vehicle should fail");
     }
 
-    // -------------------------------------------------------------------------
-    // Task: Singleton Validation
-    // -------------------------------------------------------------------------
+    
     @Test
     void testSingletonRentalSystem() throws Exception {
         // Verify the constructor is private
